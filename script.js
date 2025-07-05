@@ -112,33 +112,65 @@ class OrbitPong {
             const displayWidth = parseInt(computedStyle.width);
             const displayHeight = parseInt(computedStyle.height);
             
+            // Ensure we have valid dimensions
+            if (!displayWidth || !displayHeight || displayWidth < 50 || displayHeight < 50) {
+                return;
+            }
+            
             // Update canvas internal dimensions to match display size
             if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
                 canvas.width = displayWidth;
                 canvas.height = displayHeight;
                 
-                // Update game dimensions
-                this.centerX = canvas.width / 2;
-                this.centerY = canvas.height / 2;
-                this.arenaRadius = Math.min(canvas.width, canvas.height) * 0.45;
+                // Set up high DPI support for mobile
+                const devicePixelRatio = window.devicePixelRatio || 1;
+                if (devicePixelRatio > 1) {
+                    canvas.width = displayWidth * devicePixelRatio;
+                    canvas.height = displayHeight * devicePixelRatio;
+                    canvas.style.width = displayWidth + 'px';
+                    canvas.style.height = displayHeight + 'px';
+                    this.ctx.scale(devicePixelRatio, devicePixelRatio);
+                }
+                
+                // Update game dimensions based on CSS size, not canvas size
+                this.centerX = displayWidth / 2;
+                this.centerY = displayHeight / 2;
+                this.arenaRadius = Math.min(displayWidth, displayHeight) * 0.4;
                 this.paddle.radius = this.arenaRadius - 25;
+                
+                // Reset ball position if game is not running
+                if (!this.isPlaying) {
+                    this.ball.x = this.centerX;
+                    this.ball.y = this.centerY - 50;
+                }
                 
                 // Invalidate prerendered arena
                 this.prerenderedArena = null;
+                
+                console.log(`Canvas updated: ${displayWidth}x${displayHeight}, Arena radius: ${this.arenaRadius}`);
             }
         };
         
+        // Initial setup with delay to ensure DOM is ready
+        setTimeout(updateCanvasSize, 100);
+        
         // Update on load and resize (with debouncing)
-        updateCanvasSize();
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(updateCanvasSize, 100);
+            resizeTimeout = setTimeout(updateCanvasSize, 150);
         });
         
-        // Handle orientation changes on mobile
+        // Handle orientation changes on mobile with longer delay
         window.addEventListener('orientationchange', () => {
-            setTimeout(updateCanvasSize, 200);
+            setTimeout(updateCanvasSize, 500);
+        });
+        
+        // Also update when page visibility changes (mobile browser switching)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                setTimeout(updateCanvasSize, 100);
+            }
         });
     }
     
@@ -288,9 +320,17 @@ class OrbitPong {
         this.hitCount = 0;
         this.speedLevel = 1;
         
-        // Reset ball
+        // Ensure proper dimensions are set
+        if (!this.centerX || !this.centerY || !this.arenaRadius) {
+            this.centerX = this.canvas.width / 2;
+            this.centerY = this.canvas.height / 2;
+            this.arenaRadius = Math.min(this.canvas.width, this.canvas.height) * 0.4;
+            this.paddle.radius = this.arenaRadius - 25;
+        }
+        
+        // Reset ball to center with proper positioning
         this.ball.x = this.centerX;
-        this.ball.y = this.centerY - 100;
+        this.ball.y = this.centerY - 50;
         this.ball.speed = this.ball.baseSpeed;
         this.ball.vx = (Math.random() - 0.5) * 4;
         this.ball.vy = Math.random() * 2 + 2;
@@ -305,6 +345,8 @@ class OrbitPong {
         
         this.hideOverlay();
         this.updateUI();
+        
+        console.log(`Game started - Ball at: ${this.ball.x}, ${this.ball.y}, Arena: ${this.arenaRadius}`);
     }
     
     update() {
@@ -563,8 +605,13 @@ class OrbitPong {
     }
     
     render() {
-        // Clear canvas
+        // Clear canvas with proper bounds checking
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Ensure we have valid dimensions before drawing
+        if (!this.centerX || !this.centerY || !this.arenaRadius) {
+            return;
+        }
         
         this.drawArena();
         this.drawFunnels();
@@ -687,6 +734,13 @@ class OrbitPong {
     }
     
     drawBall() {
+        // Ensure ball is visible - add debug info for mobile
+        if (!this.ball.x || !this.ball.y) {
+            console.warn('Ball position invalid:', this.ball.x, this.ball.y);
+            this.ball.x = this.centerX || 150;
+            this.ball.y = this.centerY || 150;
+        }
+        
         // Glow effect
         this.ctx.beginPath();
         this.ctx.arc(this.ball.x, this.ball.y, this.ball.radius * 2, 0, Math.PI * 2);
@@ -793,5 +847,18 @@ class OrbitPong {
 
 // Initialize the game when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    const game = new OrbitPong();
+    // Add extra delay for mobile browsers
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const initDelay = isMobile ? 300 : 100;
+    
+    setTimeout(() => {
+        const game = new OrbitPong();
+        
+        // Debug info for mobile
+        if (isMobile) {
+            console.log('Mobile device detected, game initialized with delay');
+            console.log('Canvas dimensions:', game.canvas.width, 'x', game.canvas.height);
+            console.log('Game dimensions:', game.centerX, game.centerY, game.arenaRadius);
+        }
+    }, initDelay);
 });
