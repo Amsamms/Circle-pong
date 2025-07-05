@@ -21,10 +21,10 @@ class OrbitPong {
         this.isPaused = false;
         this.gameEnded = false;
         
-        // Canvas properties
-        this.centerX = this.canvas.width / 2;
-        this.centerY = this.canvas.height / 2;
-        this.arenaRadius = 280;
+        // Canvas properties - will be updated by setupResponsiveCanvas
+        this.centerX = 300; // Default fallback
+        this.centerY = 300; // Default fallback
+        this.arenaRadius = 240; // Default fallback
         
         // Funnel properties
         this.funnels = [
@@ -49,15 +49,15 @@ class OrbitPong {
             angle: 0,
             width: 80,
             height: 15,
-            radius: this.arenaRadius - 25,
+            radius: this.arenaRadius - 25, // Will be updated
             color: '#00f5ff',
             glowColor: 'rgba(0, 245, 255, 0.8)'
         };
         
-        // Ball properties
+        // Ball properties - will be properly positioned after canvas setup
         this.ball = {
             x: this.centerX,
-            y: this.centerY - 100,
+            y: this.centerY - 50,
             radius: 8,
             speed: 4,
             baseSpeed: 4,
@@ -119,20 +119,11 @@ class OrbitPong {
             
             // Update canvas internal dimensions to match display size
             if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+                // Set canvas size to display size (no high DPI scaling to avoid confusion)
                 canvas.width = displayWidth;
                 canvas.height = displayHeight;
                 
-                // Set up high DPI support for mobile
-                const devicePixelRatio = window.devicePixelRatio || 1;
-                if (devicePixelRatio > 1) {
-                    canvas.width = displayWidth * devicePixelRatio;
-                    canvas.height = displayHeight * devicePixelRatio;
-                    canvas.style.width = displayWidth + 'px';
-                    canvas.style.height = displayHeight + 'px';
-                    this.ctx.scale(devicePixelRatio, devicePixelRatio);
-                }
-                
-                // Update game dimensions based on CSS size, not canvas size
+                // Update game dimensions
                 this.centerX = displayWidth / 2;
                 this.centerY = displayHeight / 2;
                 this.arenaRadius = Math.min(displayWidth, displayHeight) * 0.4;
@@ -147,7 +138,7 @@ class OrbitPong {
                 // Invalidate prerendered arena
                 this.prerenderedArena = null;
                 
-                console.log(`Canvas updated: ${displayWidth}x${displayHeight}, Arena radius: ${this.arenaRadius}`);
+                console.log(`Canvas updated: ${displayWidth}x${displayHeight}, Center: ${this.centerX},${this.centerY}, Arena: ${this.arenaRadius}`);
             }
         };
         
@@ -610,7 +601,14 @@ class OrbitPong {
         
         // Ensure we have valid dimensions before drawing
         if (!this.centerX || !this.centerY || !this.arenaRadius) {
+            console.warn('Invalid game dimensions:', this.centerX, this.centerY, this.arenaRadius);
             return;
+        }
+        
+        // Mobile debug - draw a test circle to verify canvas is working
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            this.ctx.fillStyle = 'red';
+            this.ctx.fillRect(10, 10, 20, 20); // Test square in top-left
         }
         
         this.drawArena();
@@ -734,11 +732,20 @@ class OrbitPong {
     }
     
     drawBall() {
-        // Ensure ball is visible - add debug info for mobile
-        if (!this.ball.x || !this.ball.y) {
-            console.warn('Ball position invalid:', this.ball.x, this.ball.y);
-            this.ball.x = this.centerX || 150;
-            this.ball.y = this.centerY || 150;
+        // Debug ball position for mobile
+        if (this.ball.x === 0 || this.ball.y === 0 || !this.ball.x || !this.ball.y) {
+            console.warn('Ball position reset - was:', this.ball.x, this.ball.y);
+            this.ball.x = this.centerX;
+            this.ball.y = this.centerY - 50;
+            console.warn('Ball position now:', this.ball.x, this.ball.y);
+        }
+        
+        // Ensure ball stays within reasonable bounds
+        if (Math.abs(this.ball.x - this.centerX) > this.arenaRadius * 2 || 
+            Math.abs(this.ball.y - this.centerY) > this.arenaRadius * 2) {
+            console.warn('Ball out of bounds, resetting');
+            this.ball.x = this.centerX;
+            this.ball.y = this.centerY - 50;
         }
         
         // Glow effect
@@ -847,18 +854,25 @@ class OrbitPong {
 
 // Initialize the game when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    // Add extra delay for mobile browsers
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const initDelay = isMobile ? 300 : 100;
-    
+    // Force a delay to ensure CSS is fully loaded
     setTimeout(() => {
         const game = new OrbitPong();
         
-        // Debug info for mobile
+        // Add to window for debugging on mobile
+        window.game = game;
+        
+        // Mobile-specific debugging
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         if (isMobile) {
-            console.log('Mobile device detected, game initialized with delay');
-            console.log('Canvas dimensions:', game.canvas.width, 'x', game.canvas.height);
-            console.log('Game dimensions:', game.centerX, game.centerY, game.arenaRadius);
+            console.log('Mobile device detected');
+            console.log('Initial canvas dimensions:', game.canvas.width, 'x', game.canvas.height);
+            console.log('Initial game center:', game.centerX, game.centerY);
+            console.log('Initial ball position:', game.ball.x, game.ball.y);
+            
+            // Add touch debug
+            game.canvas.addEventListener('touchstart', (e) => {
+                console.log('Touch detected on canvas');
+            });
         }
-    }, initDelay);
+    }, 500); // Increased delay for mobile
 });
