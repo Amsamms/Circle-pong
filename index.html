@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orbit Pong - Circular Pong Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">ORBIT PONG</h1>
+            <div class="score-board">
+                <div class="score-item">
+                    <span class="score-label">Score</span>
+                    <span class="score-value" id="current-score">0</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">High Score</span>
+                    <span class="score-value" id="high-score">0</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Speed</span>
+                    <span class="score-value" id="speed-level">1x</span>
+                </div>
+                <div class="score-item sound-toggle" id="sound-toggle">
+                    <span class="score-label">Sound</span>
+                    <span class="score-value" id="sound-status">🔊</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-arena">
+            <canvas id="gameCanvas" width="600" height="600"></canvas>
+            <div class="game-overlay" id="game-overlay">
+                <div class="game-message">
+                    <h2 id="game-status">Ready to Play?</h2>
+                    <p id="game-instructions">
+                        Move your mouse around the circle to control the paddle<br>
+                        Keep the ball inside the arena!<br>
+                        <span style="color: #ff006e;">⚠️ Avoid the red funnels - they're exits! ⚠️</span>
+                    </p>
+                    <button id="start-btn" class="game-btn">START GAME</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls-info">
+            <div class="control-item">
+                <span class="control-icon">🖱️</span>
+                <span class="control-text">Mouse to move paddle</span>
+            </div>
+            <div class="control-item">
+                <span class="control-icon">⌨️</span>
+                <span class="control-text">A/D or ←/→ keys</span>
+            </div>
+            <div class="control-item">
+                <span class="control-icon">📱</span>
+                <span class="control-text">Touch to move on mobile</span>
+            </div>
+        </div>
+
+        <div class="game-effects">
+            <div class="particle" style="--delay: 0s; --duration: 3s;"></div>
+            <div class="particle" style="--delay: 1s; --duration: 4s;"></div>
+            <div class="particle" style="--delay: 2s; --duration: 5s;"></div>
+            <div class="particle" style="--delay: 3s; --duration: 3.5s;"></div>
+            <div class="particle" style="--delay: 4s; --duration: 4.5s;"></div>
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="paddleHitSound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+H1w3ElBTO42/DLdSgFJHfH8N2QQAoUXrTp66hVFApGn+H1w3ElBTO42/DLdSgFJH"></source>
+    </audio>
+    <audio id="wallHitSound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+H1w3ElBTO42/DLdSgFJHfH8N2QQAoUXrTp66hVFApGn+H1w3ElBTO42/DLdSgFJH"></source>
+    </audio>
+    <audio id="gameOverSound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+H1w3ElBTO42/DLdSgFJHfH8N2QQAoUXrTp66hVFApGn+H1w3ElBTO42/DLdSgFJH"></source>
+    </audio>
+
+    <script src="script.js"></script>
+</body>
+</html>

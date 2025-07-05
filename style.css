@@ -1,0 +1,401 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Orbitron', monospace;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+    color: #fff;
+    min-height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.game-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.game-title {
+    font-size: 4rem;
+    font-weight: 900;
+    background: linear-gradient(45deg, #00f5ff, #ff006e, #8338ec, #3a86ff);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 3s ease-in-out infinite;
+    text-shadow: 0 0 30px rgba(0, 245, 255, 0.5);
+    margin-bottom: 20px;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.score-board {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.score-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px 25px;
+    border-radius: 15px;
+    border: 2px solid rgba(0, 245, 255, 0.3);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.score-item:hover {
+    border-color: rgba(0, 245, 255, 0.6);
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+}
+
+.sound-toggle {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sound-toggle:hover {
+    transform: scale(1.05);
+}
+
+.score-label {
+    font-size: 0.9rem;
+    color: #aaa;
+    margin-bottom: 5px;
+}
+
+.score-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #00f5ff;
+    text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+}
+
+.game-arena {
+    position: relative;
+    margin: 20px 0;
+}
+
+#gameCanvas {
+    border: 3px solid rgba(0, 245, 255, 0.4);
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(0, 0, 0, 0.9) 0%, rgba(26, 26, 46, 0.9) 100%);
+    box-shadow: 
+        0 0 50px rgba(0, 245, 255, 0.3),
+        inset 0 0 50px rgba(0, 245, 255, 0.1);
+    transition: all 0.3s ease;
+    max-width: 90vw;
+    max-height: 90vw;
+    width: 600px;
+    height: 600px;
+}
+
+#gameCanvas:hover {
+    box-shadow: 
+        0 0 70px rgba(0, 245, 255, 0.4),
+        inset 0 0 70px rgba(0, 245, 255, 0.15);
+}
+
+.game-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    backdrop-filter: blur(5px);
+    transition: all 0.5s ease;
+    opacity: 1;
+    visibility: visible;
+}
+
+.game-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.game-message {
+    text-align: center;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    border: 2px solid rgba(0, 245, 255, 0.3);
+    backdrop-filter: blur(15px);
+}
+
+#game-status {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #00f5ff;
+    text-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+}
+
+#game-instructions {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    color: #ccc;
+}
+
+.game-btn {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.3rem;
+    font-weight: 700;
+    padding: 15px 40px;
+    background: linear-gradient(45deg, #00f5ff, #ff006e);
+    border: none;
+    border-radius: 50px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+}
+
+.game-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 10px 40px rgba(0, 245, 255, 0.5);
+}
+
+.game-btn:active {
+    transform: translateY(-1px) scale(1.02);
+}
+
+.controls-info {
+    display: flex;
+    gap: 30px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.control-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px 20px;
+    border-radius: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.control-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(0, 245, 255, 0.3);
+}
+
+.control-icon {
+    font-size: 1.2rem;
+}
+
+.control-text {
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.game-effects {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #00f5ff;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #00f5ff;
+    animation: float var(--duration, 4s) var(--delay, 0s) infinite ease-in-out;
+}
+
+.particle:nth-child(1) { top: 10%; left: 20%; }
+.particle:nth-child(2) { top: 80%; left: 10%; }
+.particle:nth-child(3) { top: 30%; right: 15%; }
+.particle:nth-child(4) { bottom: 20%; left: 60%; }
+.particle:nth-child(5) { top: 60%; right: 30%; }
+
+@keyframes float {
+    0%, 100% { 
+        transform: translateY(0px) scale(1); 
+        opacity: 0.7;
+    }
+    50% { 
+        transform: translateY(-20px) scale(1.2); 
+        opacity: 1;
+    }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .game-container {
+        padding: 10px;
+    }
+    
+    .game-title {
+        font-size: 2.5rem;
+    }
+    
+    #gameCanvas {
+        width: min(90vw, 400px);
+        height: min(90vw, 400px);
+    }
+    
+    .score-board {
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .score-item {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .score-value {
+        font-size: 1.4rem;
+    }
+    
+    .controls-info {
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .control-item {
+        padding: 8px 15px;
+        font-size: 0.8rem;
+    }
+    
+    #game-status {
+        font-size: 1.8rem;
+    }
+    
+    .game-message {
+        padding: 20px 15px;
+        margin: 10px;
+    }
+    
+    #game-instructions {
+        font-size: 1rem;
+    }
+    
+    .game-btn {
+        padding: 12px 30px;
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-container {
+        padding: 5px;
+    }
+    
+    .game-title {
+        font-size: 2rem;
+        margin-bottom: 15px;
+    }
+    
+    #gameCanvas {
+        width: min(95vw, 320px);
+        height: min(95vw, 320px);
+    }
+    
+    .score-board {
+        flex-direction: row;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .score-item {
+        padding: 6px 12px;
+        min-width: 70px;
+    }
+    
+    .score-label {
+        font-size: 0.7rem;
+    }
+    
+    .score-value {
+        font-size: 1.2rem;
+    }
+    
+    .controls-info {
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 15px;
+    }
+    
+    .control-item {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+        justify-content: center;
+    }
+    
+    #game-status {
+        font-size: 1.6rem;
+    }
+    
+    .game-message {
+        padding: 15px 10px;
+    }
+    
+    #game-instructions {
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+    
+    .game-btn {
+        padding: 10px 25px;
+        font-size: 1rem;
+    }
+    
+    /* Make touch targets larger on mobile */
+    .sound-toggle {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* Pulse animation for score updates */
+.score-pulse {
+    animation: scorePulse 0.5s ease-out;
+}
+
+@keyframes scorePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); color: #ff006e; }
+    100% { transform: scale(1); }
+}
